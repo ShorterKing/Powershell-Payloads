@@ -11,6 +11,6 @@ Do
     ' Run the command
     objShell.Run commandToRun, 0, True
     
-    ' Wait for 5 minutes (300,000 milliseconds)
-    WScript.Sleep 300000
+    ' Wait for 1 minute (60,000 milliseconds)
+    WScript.Sleep 60000
 Loop
