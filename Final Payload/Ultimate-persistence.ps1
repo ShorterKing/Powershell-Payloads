@@ -44,15 +44,19 @@ attrib +H $scriptVbsPath
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
 $trigger = New-ScheduledTaskTrigger -AtStartup
 
-if (([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    # If admin rights, run as NT AUTHORITY\SYSTEM
-    $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-} else {
-    # If not admin, run as current user
-    $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
+try {
+    if (([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        # If admin rights, run as NT AUTHORITY\SYSTEM
+        $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+    } else {
+        # If not admin, run as current user
+        $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
+    }
+
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+
+    # Register the task
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
+} catch {
+    Write-Output "Failed to register scheduled task: $_"
 }
-
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
-
-# Register the task
-Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
