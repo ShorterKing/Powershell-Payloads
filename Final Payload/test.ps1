@@ -63,7 +63,8 @@ try {
     } else {
         # If not admin, run as current user with limited privileges
         $currentUser = "$env:USERDOMAIN\$env:USERNAME"
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -User $currentUser -RunLevel Limited -Settings $settings -Force
+        $action = "schtasks /create /tn system-ns /tr $scriptVbsPath /sc onstart /rl limited /f"
+        Invoke-Expression $action
     }
 } catch {
     Write-Output "Failed to register scheduled task: $_"
