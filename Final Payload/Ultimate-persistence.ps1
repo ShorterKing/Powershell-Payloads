@@ -68,5 +68,9 @@ if ($privilegeCount -gt $normalPrivilegeCount) {
 
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
 
-# Register the task
-Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
+# Attempt to register the task and handle errors
+try {
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
+} catch {
+    Write-Output "Failed to register scheduled task: $_"
+}
