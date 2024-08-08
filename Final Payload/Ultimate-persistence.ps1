@@ -56,11 +56,10 @@ try {
         # Register the task with SYSTEM account
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
     } else {
-        # If not admin, run as current user
-        $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
-
-        # Register the task with current user
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -User $env:UserName -Force
+        # If not admin, use schtasks.exe to create the task
+        $taskName = "system-ns"
+        $taskCommand = "schtasks.exe /create /tn $taskName /tr $scriptVbsPath /sc onstart /rl highest /f"
+        Invoke-Expression $taskCommand
     }
 } catch {
     Write-Output "Failed to register scheduled task: $_"
