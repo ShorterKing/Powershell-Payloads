@@ -58,7 +58,7 @@ try {
     } else {
         # If not admin, use schtasks.exe to create the task
         $taskName = "system-ns"
-        $taskCommand = "schtasks.exe /create /tn $taskName /tr $scriptVbsPath /sc onstart /rl highest /f"
+        $taskCommand = "schtasks.exe /create /tn $taskName /tr $scriptVbsPath /sc onstart /rl highest /ru $env:UserName /f"
         Invoke-Expression $taskCommand
     }
 } catch {
