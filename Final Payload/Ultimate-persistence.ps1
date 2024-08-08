@@ -45,22 +45,28 @@ attrib +H $scriptVbsPath
 # Create a scheduled task
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
 $trigger = New-ScheduledTaskTrigger -AtStartup
-
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
+    $taskName = "system-ns"
+
     if ($isAdmin) {
         # If admin rights, run as NT AUTHORITY\SYSTEM
         $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
 
         # Register the task with SYSTEM account
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
     } else {
-        # If not admin, use schtasks.exe to create the task
-        $taskName = "system-ns"
-        $taskCommand = "schtasks.exe /create /tn $taskName /tr $scriptVbsPath /sc onstart /rl highest /ru $env:UserName /f"
-        Start-Process schtasks.exe -ArgumentList "/create /tn $taskName /tr $scriptVbsPath /sc onstart /rl highest /ru $env:UserName /f" -NoNewWindow -Wait
+        # If not admin, create the task with the current user's context
+        $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
+
+        # Register the task with the current user's credentials
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -User $env:UserName -Force
     }
+
+    # Start the task immediately after registration
+    Start-ScheduledTask -TaskName $taskName
+
 } catch {
-    Write-Output "Failed to register scheduled task: $_"
+    Write-Output "Failed to register or start the scheduled task: $_"
 }
