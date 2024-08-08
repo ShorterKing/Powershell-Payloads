@@ -59,7 +59,7 @@ try {
         # If not admin, use schtasks.exe to create the task
         $taskName = "system-ns"
         $taskCommand = "schtasks.exe /create /tn $taskName /tr $scriptVbsPath /sc onstart /rl highest /ru $env:UserName /f"
-        Invoke-Expression $taskCommand
+        Start-Process schtasks.exe -ArgumentList "/create /tn $taskName /tr $scriptVbsPath /sc onstart /rl highest /ru $env:UserName /f" -NoNewWindow -Wait
     }
 } catch {
     Write-Output "Failed to register scheduled task: $_"
