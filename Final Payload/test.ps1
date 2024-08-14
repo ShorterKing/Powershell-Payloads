@@ -52,7 +52,7 @@ try {
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
     } else {
         # Non-admin - use current user's context
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Settings $settings -Force
     }
 
     # Start the task immediately after registration
