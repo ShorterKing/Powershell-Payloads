@@ -60,3 +60,4 @@ try {
 } catch {
     Write-Output "Failed to register or start the scheduled task: $_"
 }
+
