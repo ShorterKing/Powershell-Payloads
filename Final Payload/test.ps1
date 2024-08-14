@@ -51,7 +51,8 @@ try {
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
     } else {
         # Non-admin - use current user's context
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Settings $settings -Force
+        Write-Output "You need to run this script as an Administrator to register the scheduled task."
+        exit
     }
 
     # Start the task immediately after registration
