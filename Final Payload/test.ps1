@@ -47,13 +47,12 @@ try {
     $taskName = "system-ns"
 
     if ($isAdmin) {
-        # If admin rights, run as NT AUTHORITY\SYSTEM
+        # Admin rights - run as SYSTEM
         $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
     } else {
-        # If not admin, create the task with the current user's context
-        $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+        # Non-admin - use current user's context
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Settings $settings -Force
     }
 
     # Start the task immediately after registration
