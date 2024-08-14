@@ -61,7 +61,7 @@ try {
         # If not admin, create the task with the current user's context
         $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
 
-        # Register the task without the -User parameter
+        # Register the task without the -User parameter (Fix from the first script)
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
     }
 
