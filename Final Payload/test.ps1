@@ -39,8 +39,7 @@ foreach ($file in $filesToHide) {
 
 # Create a scheduled task
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
-$trigger = New-ScheduledTaskTrigger -Daily -At (Get-Date).AddMinutes(1)
-$trigger.Repetition = $(New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionDuration (New-TimeSpan -Hours 24) -RepetitionInterval (New-TimeSpan -Minutes 1)).Repetition
+$trigger = New-ScheduledTaskTrigger -AtStartup
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
