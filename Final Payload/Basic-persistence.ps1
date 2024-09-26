@@ -30,15 +30,12 @@ $action = New-ScheduledTaskAction -Execute "wscript.exe" -Argument $scriptVbsPat
 # Define the trigger to run at startup
 $trigger = New-ScheduledTaskTrigger -AtStartup
 
-# Define the principal for the current user
-$principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest
-
 # Create the scheduled task settings
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
 
 try {
-    # Register the task for the current user with the specified principal
-    Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -TaskName "RunScriptVBSAtStartup" -Settings $settings -Force
+    # Register the task for the current user without specifying Principal
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "RunScriptVBSAtStartup" -Settings $settings -User $env:USERNAME -Force
     Write-Output "Scheduled task 'RunScriptVBSAtStartup' has been created and will run at startup."
 } catch {
     Write-Output "Failed to create the scheduled task: $_"
