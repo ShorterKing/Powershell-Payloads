@@ -54,33 +54,30 @@ if ($isAdmin) {
     }
 }
 
-# Define the action to run script.vbs using wscript.exe
-# Ensure the argument includes quotes around the path to handle spaces
+# Define the action to run script.vbs using wscript.exe with quoted path
 $action = New-ScheduledTaskAction -Execute "wscript.exe" -Argument "`"$scriptVbsPath`""
 
-# Define the trigger to run at startup
-$trigger = New-ScheduledTaskTrigger -AtStartup
-
-# Create the scheduled task settings
+# Define the task settings
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
 
-# Set the task name
-$taskName = "RunScriptVBSAtStartup"
+# Configure the scheduled task based on privilege level
+if ($isAdmin) {
+    # For admin: run at startup as SYSTEM with highest privileges
+    $trigger = New-ScheduledTaskTrigger -AtStartup
+    $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+    $taskName = "RunScriptVBS-SYSTEM"
+} else {
+    # For non-admin: run at logon as current user with interactive logon
+    $trigger = New-ScheduledTaskTrigger -AtLogon -User $env:USERNAME
+    $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive
+    $taskName = "RunScriptVBS-$env:USERNAME"
+}
 
+# Register the scheduled task
 try {
-    if ($isAdmin) {
-        # For admin, run as SYSTEM with highest privileges
-        $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force -ErrorAction Stop
-    } else {
-        # For non-admin, run as the current user
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Settings $settings -User $env:USERNAME -Force -ErrorAction Stop
-    }
-    Write-Output "Scheduled task '$taskName' has been created and will run at startup."
-    # Attempt to start the task immediately for testing
-    Start-ScheduledTask -TaskName $taskName -ErrorAction Stop
-    Write-Output "Scheduled task started successfully"
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force -ErrorAction Stop
+    Write-Output "Scheduled task '$taskName' has been created successfully."
 } catch {
-    Write-Output "Failed to create or start the scheduled task: $_"
+    Write-Output "Failed to create the scheduled task: $_"
     exit
 }
