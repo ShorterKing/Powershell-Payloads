@@ -57,30 +57,30 @@ if ($isAdmin) {
 # Define the task name (unique by including username)
 $taskName = "RunScriptVBS-$($env:USERNAME -replace '\s+', '')"
 
-# Use schtasks to create the scheduled task
+# Construct the schtasks command with proper quoting
 if ($isAdmin) {
     # For admin: Run as SYSTEM at startup
-    $taskCommand = "schtasks /create /tn `"$taskName`" /tr `\"wscript.exe \`"$scriptVbsPath\`"`\" /sc onstart /ru SYSTEM /f"
+    $taskCommand = "schtasks.exe /create /tn `"$taskName`" /tr `"wscript.exe \`"$scriptVbsPath\`"`" /sc onstart /ru SYSTEM /f"
 } else {
     # For non-admin: Run as current user at logon
-    $taskCommand = "schtasks /create /tn `"$taskName`" /tr `\"wscript.exe \`"$scriptVbsPath\`"`\" /sc onlogon /ru `"$env:USERNAME`" /f"
+    $taskCommand = "schtasks.exe /create /tn `"$taskName`" /tr `"wscript.exe \`"$scriptVbsPath\`"`" /sc onlogon /ru `"$env:USERNAME`" /f"
 }
 
 try {
-    # Execute the schtasks command
-    Invoke-Expression $taskCommand
-    if ($LASTEXITCODE -eq 0) {
+    # Run the schtasks command using Start-Process and capture output
+    $result = Start-Process -FilePath "cmd.exe" -ArgumentList "/c $taskCommand" -NoNewWindow -Wait -PassThru
+    if ($result.ExitCode -eq 0) {
         Write-Output "Scheduled task '$taskName' has been created successfully."
-        # Attempt to run the task immediately for testing (optional)
-        schtasks /run /tn "$taskName"
-        if ($LASTEXITCODE -eq 0) {
+        # Attempt to run the task immediately for testing
+        $runResult = Start-Process -FilePath "schtasks.exe" -ArgumentList "/run /tn `"$taskName`"" -NoNewWindow -Wait -PassThru
+        if ($runResult.ExitCode -eq 0) {
             Write-Output "Scheduled task started successfully."
         } else {
             Write-Output "Failed to start the task immediately, but it’s scheduled."
         }
     } else {
-        Write-Output "Failed to create the scheduled task. Exit code: $LASTEXITCODE"
+        Write-Output "Failed to create the scheduled task. Exit code: $($result.ExitCode)"
     }
 } catch {
-    Write-Output "Error creating the scheduled task: $_"
+    Write-Output "Error executing schtasks: $_"
 }
