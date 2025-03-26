@@ -54,30 +54,33 @@ if ($isAdmin) {
     }
 }
 
-# Define the action to run script.vbs using wscript.exe with quoted path
-$action = New-ScheduledTaskAction -Execute "wscript.exe" -Argument "`"$scriptVbsPath`""
+# Define the task name (unique by including username)
+$taskName = "RunScriptVBS-$($env:USERNAME -replace '\s+', '')"
 
-# Define the task settings
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
-
-# Configure the scheduled task based on privilege level
+# Use schtasks to create the scheduled task
 if ($isAdmin) {
-    # For admin: run at startup as SYSTEM with highest privileges
-    $trigger = New-ScheduledTaskTrigger -AtStartup
-    $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-    $taskName = "RunScriptVBS-SYSTEM"
+    # For admin: Run as SYSTEM at startup
+    $taskCommand = "schtasks /create /tn `"$taskName`" /tr `\"wscript.exe \`"$scriptVbsPath\`"`\" /sc onstart /ru SYSTEM /f"
 } else {
-    # For non-admin: run at logon as current user with interactive logon
-    $trigger = New-ScheduledTaskTrigger -AtLogon -User $env:USERNAME
-    $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive
-    $taskName = "RunScriptVBS-$env:USERNAME"
+    # For non-admin: Run as current user at logon
+    $taskCommand = "schtasks /create /tn `"$taskName`" /tr `\"wscript.exe \`"$scriptVbsPath\`"`\" /sc onlogon /ru `"$env:USERNAME`" /f"
 }
 
-# Register the scheduled task
 try {
-    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force -ErrorAction Stop
-    Write-Output "Scheduled task '$taskName' has been created successfully."
+    # Execute the schtasks command
+    Invoke-Expression $taskCommand
+    if ($LASTEXITCODE -eq 0) {
+        Write-Output "Scheduled task '$taskName' has been created successfully."
+        # Attempt to run the task immediately for testing (optional)
+        schtasks /run /tn "$taskName"
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output "Scheduled task started successfully."
+        } else {
+            Write-Output "Failed to start the task immediately, but it’s scheduled."
+        }
+    } else {
+        Write-Output "Failed to create the scheduled task. Exit code: $LASTEXITCODE"
+    }
 } catch {
-    Write-Output "Failed to create the scheduled task: $_"
-    exit
+    Write-Output "Error creating the scheduled task: $_"
 }
